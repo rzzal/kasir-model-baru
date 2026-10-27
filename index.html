@@ -1,442 +1,418 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS Kasir Super Toko Smart</title>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="Aplikasi Kasir Toko Super Lengkap">
+    <title>KasirKu - Aplikasi Kasir Toko</title>
     
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Link ke CSS -->
+    <link rel="stylesheet" href="style.css">
     
-    <!-- ====================================================================
-         BAGIAN 1: CSS (TEMA, ANIMASI, & STYLE KHUSUS CETAK)
-         ==================================================================== -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        /* Mode Cetak Struk & Laporan Kasir */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-area, #print-area * {
-                visibility: visible;
-            }
-            #print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background: white;
-                color: black;
-                padding: 15px;
-            }
-            .no-print {
-                display: none !important;
-            }
-        }
-
-        /* Visual Scrollbar Tipis Modern */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+    <!-- Manifest untuk PWA (bisa diinstall seperti aplikasi) -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon sederhana -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
-
-    <!-- ====================================================================
-         BAGIAN 2: STRUCTURAL HTML (HEADER, NAVIGASI, & HALAMAN UTAMA)
-         ==================================================================== -->
-
-    <!-- Top Navigation Bar -->
-    <header class="bg-indigo-700 text-white shadow-md no-print sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo & Status Koneksi Offline/Online -->
-                <div class="flex items-center space-x-3">
-                    <div class="bg-white/10 p-2 rounded-xl backdrop-blur-sm">
-                        <i data-lucide="store" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Tokoku POS</h1>
-                        <div class="flex items-center gap-2">
-                            <span id="status-badge" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500 text-white">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white mr-1.5 animate-pulse"></span>
-                                Online
-                            </span>
-                            <span id="live-clock" class="text-xs text-indigo-200"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Navigasi Menu Desktop -->
-                <nav class="hidden md:flex space-x-1">
-                    <button onclick="switchTab('kasir')" id="nav-kasir" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium bg-indigo-800 text-white flex items-center gap-2 transition">
-                        <i data-lucide="shopping-cart" class="w-4 h-4"></i> Kasir
-                    </button>
-                    <button onclick="switchTab('stok')" id="nav-stok" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-indigo-100 hover:bg-indigo-600 hover:text-white flex items-center gap-2 transition">
-                        <i data-lucide="package" class="w-4 h-4"></i> Stok & Restock
-                        <span id="low-stock-badge" class="hidden bg-rose-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
-                    </button>
-                    <button onclick="switchTab('riwayat')" id="nav-riwayat" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-indigo-100 hover:bg-indigo-600 hover:text-white flex items-center gap-2 transition">
-                        <i data-lucide="history" class="w-4 h-4"></i> Riwayat & Audit Log
-                    </button>
-                    <button onclick="switchTab('pengingat')" id="nav-pengingat" class="nav-btn px-3 py-2 rounded-lg text-sm font-medium text-indigo-100 hover:bg-indigo-600 hover:text-white flex items-center gap-2 transition">
-                        <i data-lucide="bell" class="w-4 h-4"></i> Pengingat
-                    </button>
-                </nav>
-
-                <!-- Responsive Mobile Menu Trigger -->
-                <div class="md:hidden flex items-center">
-                    <button onclick="toggleMobileMenu()" class="text-indigo-200 hover:text-white focus:outline-none p-1">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
-                    </button>
-                </div>
-            </div>
+<body>
+    
+    <!-- ============================================ -->
+    <!-- SIDEBAR NAVIGASI                             -->
+    <!-- ============================================ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>🛒 KasirKu</h1>
+            <p class="subtitle">Aplikasi Kasir Toko</p>
         </div>
-
-        <!-- Mobile Navigation Dropdown -->
-        <div id="mobile-menu" class="hidden md:hidden bg-indigo-800 border-t border-indigo-600 px-4 pt-2 pb-3 space-y-1">
-            <button onclick="switchTab('kasir'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-indigo-700 flex items-center gap-2">
-                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Kasir
+        
+        <nav class="nav-menu">
+            <!-- Tombol navigasi untuk setiap halaman -->
+            <button class="nav-btn active" data-page="dashboard">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
             </button>
-            <button onclick="switchTab('stok'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-100 hover:bg-indigo-700 flex items-center gap-2">
-                <i data-lucide="package" class="w-4 h-4"></i> Stok & Restock
+            <button class="nav-btn" data-page="kasir">
+                <span class="icon">💰</span>
+                <span>Kasir (POS)</span>
             </button>
-            <button onclick="switchTab('riwayat'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-100 hover:bg-indigo-700 flex items-center gap-2">
-                <i data-lucide="history" class="w-4 h-4"></i> Riwayat Transaksi
+            <button class="nav-btn" data-page="produk">
+                <span class="icon">📦</span>
+                <span>Produk & Stok</span>
             </button>
-            <button onclick="switchTab('pengingat'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-indigo-100 hover:bg-indigo-700 flex items-center gap-2">
-                <i data-lucide="bell" class="w-4 h-4"></i> Pengingat & Alert
+            <button class="nav-btn" data-page="restock">
+                <span class="icon">🔄</span>
+                <span>Re-Stock</span>
             </button>
+            <button class="nav-btn" data-page="riwayat">
+                <span class="icon">📜</span>
+                <span>Riwayat Transaksi</span>
+            </button>
+            <button class="nav-btn" data-page="pengingat">
+                <span class="icon">🔔</span>
+                <span>Pengingat</span>
+            </button>
+            <button class="nav-btn" data-page="pengaturan">
+                <span class="icon">⚙️</span>
+                <span>Pengaturan</span>
+            </button>
+        </nav>
+        
+        <!-- Status koneksi online/offline -->
+        <div class="sidebar-footer">
+            <div class="status-indicator" id="statusKoneksi">
+                <span class="status-dot"></span>
+                <span class="status-text">Online</span>
+            </div>
+            <p class="version">v1.0.0</p>
         </div>
-    </header>
-
-    <!-- Main Content Body -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 no-print">
-
-        <!-- ==================== TAB 1: KASIR & PENJUALAN ==================== -->
-        <section id="tab-kasir" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Katalog Produk -->
-            <div class="lg:col-span-7 xl:col-span-8 space-y-4">
-                <div class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <div class="relative w-full sm:w-72">
-                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="search-product" placeholder="Cari nama barang..." oninput="renderProducts()" class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <select id="filter-category" onchange="renderProducts()" class="w-full sm:w-auto border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="ALL">Semua Kategori</option>
-                            <option value="Makanan">Makanan</option>
-                            <option value="Minuman">Minuman</option>
-                            <option value="Bahan">Bahan Baku</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Grid Daftar Produk -->
-                <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-                    <!-- Dinamis via JavaScript -->
-                </div>
+    </aside>
+    
+    <!-- ============================================ -->
+    <!-- AREA KONTEN UTAMA                            -->
+    <!-- ============================================ -->
+    <main class="main-content">
+        
+        <!-- Header atas dengan jam realtime -->
+        <header class="top-header">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <div class="header-info">
+                <h2 id="pageTitle">Dashboard</h2>
+                <p id="tanggalSekarang">Memuat tanggal...</p>
             </div>
-
-            <!-- Keranjang & Billing Kasir -->
-            <div class="lg:col-span-5 xl:col-span-4">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-140px)] sticky top-20">
-                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-xl">
-                        <h2 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="shopping-bag" class="w-5 h-5 text-indigo-600"></i> Keranjang
-                        </h2>
-                        <button onclick="clearCart()" class="text-xs text-rose-600 hover:text-rose-700 font-medium hover:underline">
-                            Kosongkan
-                        </button>
-                    </div>
-
-                    <!-- Items Keranjang -->
-                    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3">
-                        <!-- JS Inject -->
-                    </div>
-
-                    <!-- Ringkasan Bayar -->
-                    <div class="p-4 border-t border-slate-100 bg-slate-50/50 rounded-b-xl space-y-3">
-                        <div class="space-y-1.5 text-sm">
-                            <div class="flex justify-between text-slate-500">
-                                <span>Subtotal</span>
-                                <span id="cart-subtotal" class="font-medium text-slate-700">Rp 0</span>
-                            </div>
-                            <div class="flex justify-between items-center text-slate-500">
-                                <span>Diskon (Rp)</span>
-                                <input type="number" id="cart-discount" value="0" min="0" oninput="updateCartTotals()" class="w-24 px-2 py-1 text-right text-xs border rounded bg-white font-medium focus:ring-1 focus:ring-indigo-500">
-                            </div>
-                            <div class="flex justify-between text-slate-900 text-base font-bold pt-2 border-t border-slate-200">
-                                <span>Total Bayar</span>
-                                <span id="cart-total" class="text-indigo-600">Rp 0</span>
-                            </div>
-                        </div>
-
-                        <!-- Form Nominal Bayar -->
-                        <div class="pt-2 space-y-2">
-                            <div>
-                                <label class="text-xs text-slate-500 font-medium block mb-1">Uang Diterima (Rp)</label>
-                                <input type="number" id="payment-amount" placeholder="0" oninput="calculateChange()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                            </div>
-                            <div class="flex justify-between text-xs text-slate-600 font-medium px-1">
-                                <span>Kembalian:</span>
-                                <span id="cart-change" class="font-bold text-slate-800">Rp 0</span>
-                            </div>
-
-                            <button onclick="processCheckout()" id="checkout-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md shadow-indigo-200 flex items-center justify-center gap-2">
-                                <i data-lucide="check-circle-2" class="w-5 h-5"></i> Selesaikan Transaksi
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== TAB 2: STOK & RESTOCK BAHAN Baku ==================== -->
-        <section id="tab-stok" class="tab-content hidden space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800">Manajemen Stok & Bahan Baku</h2>
-                    <p class="text-xs text-slate-500">Kelola jumlah barang, harga jual, dan lakukan restock bahan baku yang hampir habis.</p>
-                </div>
-                <button onclick="openProductModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Item Baru
+            <div class="header-actions">
+                <div class="clock" id="clock">00:00:00</div>
+                <button class="notif-btn" id="notifBtn">
+                    🔔 <span class="badge" id="notifBadge">0</span>
                 </button>
             </div>
-
-            <!-- Tabel Inventaris -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-200">
+        </header>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN DASHBOARD                        -->
+        <!-- ======================================== -->
+        <section class="page active" id="page-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Pendapatan Hari Ini</p>
+                        <h3 class="stat-value" id="statPendapatanHariIni">Rp 0</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🧾</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Transaksi Hari Ini</p>
+                        <h3 class="stat-value" id="statTransaksiHariIni">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Total Produk</p>
+                        <h3 class="stat-value" id="statTotalProduk">0</h3>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <p class="stat-label">Stok Menipis</p>
+                        <h3 class="stat-value" id="statStokMenipis">0</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Daftar stok menipis di dashboard -->
+            <div class="card">
+                <h3>⚠️ Peringatan Stok Menipis</h3>
+                <div id="daftarStokMenipis" class="list-container">
+                    <p class="empty-state">Semua stok aman 👍</p>
+                </div>
+            </div>
+            
+            <!-- Pengingat aktif hari ini -->
+            <div class="card">
+                <h3>🔔 Pengingat Aktif</h3>
+                <div id="daftarPengingatAktif" class="list-container">
+                    <p class="empty-state">Tidak ada pengingat</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN KASIR (POS)                      -->
+        <!-- ======================================== -->
+        <section class="page" id="page-kasir">
+            <div class="kasir-layout">
+                <!-- Daftar produk untuk dipilih -->
+                <div class="kasir-products">
+                    <div class="search-bar">
+                        <input type="text" id="searchProdukKasir" placeholder="🔍 Cari produk...">
+                    </div>
+                    <div class="products-grid" id="produkGridKasir">
+                        <!-- Produk akan di-render oleh JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Keranjang belanja -->
+                <div class="kasir-cart">
+                    <h3>🛒 Keranjang</h3>
+                    <div class="cart-items" id="cartItems">
+                        <p class="empty-state">Keranjang kosong</p>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="cartSubtotal">Rp 0</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span id="cartTotal">Rp 0</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Bayar:</label>
+                            <input type="number" id="inputBayar" placeholder="0" min="0">
+                        </div>
+                        <div class="summary-row">
+                            <span>Kembalian:</span>
+                            <span id="cartKembalian">Rp 0</span>
+                        </div>
+                        <button class="btn btn-primary btn-block" id="btnBayar">💳 Bayar</button>
+                        <button class="btn btn-secondary btn-block" id="btnBatalKeranjang">❌ Batal</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN PRODUK & STOK                    -->
+        <!-- ======================================== -->
+        <section class="page" id="page-produk">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📦 Daftar Produk</h3>
+                    <button class="btn btn-primary" id="btnTambahProduk">+ Tambah Produk</button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="searchProduk" placeholder="🔍 Cari produk...">
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <th class="p-4">Nama Barang</th>
-                                <th class="p-4">Kategori</th>
-                                <th class="p-4">Harga Beli</th>
-                                <th class="p-4">Harga Jual</th>
-                                <th class="p-4">Stok Saat Ini</th>
-                                <th class="p-4">Batas Minimal</th>
-                                <th class="p-4 text-center">Aksi / Re-stock</th>
+                                <th>Nama Produk</th>
+                                <th>Kategori</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th>Min. Stok</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                            <!-- JS Inject -->
+                        <tbody id="tabelProduk">
+                            <!-- Data produk akan di-render oleh JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
-
-        <!-- ==================== TAB 3: RIWAYAT & AUDIT LOG REALTIME ==================== -->
-        <section id="tab-riwayat" class="tab-content hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">Riwayat Transaksi & Audit Log Realtime</h2>
-                        <p class="text-xs text-slate-500">Mencatat aktivitas transaksi dan restock dari awal penggunaan secara live.</p>
-                    </div>
-                    <!-- Export & Drive Options -->
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Unduh CSV / Excel
-                        </button>
-                        <button onclick="backupJSON()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                            <i data-lucide="hard-drive" class="w-4 h-4"></i> Simpan Backup JSON
-                        </button>
-                        <button onclick="printReport()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                            <i data-lucide="printer" class="w-4 h-4"></i> Cetak Laporan
-                        </button>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN RE-STOCK                         -->
+        <!-- ======================================== -->
+        <section class="page" id="page-restock">
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔄 Re-Stock Bahan</h3>
+                    <button class="btn btn-primary" id="btnTambahRestock">+ Catat Re-Stock</button>
+                </div>
+                <p class="info-text">Catat penambahan stok bahan. Setiap re-stock akan otomatis tercatat di riwayat transaksi.</p>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Produk</th>
+                                <th>Jumlah</th>
+                                <th>Harga Satuan</th>
+                                <th>Total Biaya</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelRestock">
+                            <!-- Data re-stock akan di-render oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN RIWAYAT TRANSAKSI                -->
+        <!-- ======================================== -->
+        <section class="page" id="page-riwayat">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📜 Riwayat Transaksi</h3>
+                    <div class="header-actions-group">
+                        <!-- Tombol export ke berbagai format -->
+                        <button class="btn btn-success" id="btnExportJSON">💾 Export JSON</button>
+                        <button class="btn btn-success" id="btnExportCSV">📊 Export CSV</button>
+                        <button class="btn btn-info" id="btnCetak">🖨️ Cetak</button>
+                        <button class="btn btn-secondary" id="btnSimpanDrive">☁️ Simpan ke Drive</button>
                     </div>
                 </div>
-
-                <!-- Custom Filter Tanggal Indonesia -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Mulai</label>
-                        <input type="date" id="filter-start-date" onchange="renderHistory()" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                
+                <!-- Filter tanggal -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>Dari Tanggal:</label>
+                        <input type="date" id="filterTanggalMulai">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Selesai</label>
-                        <input type="date" id="filter-end-date" onchange="renderHistory()" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
+                    <div class="filter-group">
+                        <label>Sampai Tanggal:</label>
+                        <input type="date" id="filterTanggalAkhir">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Jenis Aktivitas</label>
-                        <select id="filter-type" onchange="renderHistory()" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="ALL">Semua Aktivitas</option>
-                            <option value="PENJUALAN">Penjualan Sah</option>
-                            <option value="RESTOCK">Restock Stok/Bahan</option>
+                    <div class="filter-group">
+                        <label>Jenis:</label>
+                        <select id="filterJenis">
+                            <option value="semua">Semua</option>
+                            <option value="penjualan">Penjualan</option>
+                            <option value="restock">Re-Stock</option>
                         </select>
                     </div>
+                    <button class="btn btn-primary" id="btnTerapkanFilter">Terapkan</button>
+                    <button class="btn btn-secondary" id="btnResetFilter">Reset</button>
                 </div>
-            </div>
-
-            <!-- Ringkasan Statistik Riwayat -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
-                    <span class="text-xs text-indigo-600 font-semibold uppercase">Total Penjualan</span>
-                    <h3 id="stat-sales" class="text-xl font-bold text-indigo-900 mt-1">Rp 0</h3>
+                
+                <!-- Ringkasan filter -->
+                <div class="summary-box" id="riwayatSummary">
+                    <div class="summary-item">
+                        <span>Total Transaksi:</span>
+                        <strong id="summaryTotalTransaksi">0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Pendapatan:</span>
+                        <strong id="summaryTotalPendapatan">Rp 0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Pengeluaran:</span>
+                        <strong id="summaryTotalPengeluaran">Rp 0</strong>
+                    </div>
                 </div>
-                <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl">
-                    <span class="text-xs text-amber-600 font-semibold uppercase">Total Pengeluaran Restock</span>
-                    <h3 id="stat-restock" class="text-xl font-bold text-amber-900 mt-1">Rp 0</h3>
-                </div>
-                <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
-                    <span class="text-xs text-emerald-600 font-semibold uppercase">Total Entri Transaksi</span>
-                    <h3 id="stat-count" class="text-xl font-bold text-emerald-900 mt-1">0 Transaksi</h3>
-                </div>
-            </div>
-
-            <!-- Tabel Riwayat Realtime -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-200">
+                
+                <!-- Daftar riwayat -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <th class="p-4">ID Transaksi</th>
-                                <th class="p-4">Waktu (WIB / Indonesia)</th>
-                                <th class="p-4">Jenis</th>
-                                <th class="p-4">Detail Rincian Item</th>
-                                <th class="p-4">Nominal Total</th>
-                                <th class="p-4 text-center">Aksi / Cetak</th>
+                                <th>No. Transaksi</th>
+                                <th>Tanggal & Waktu</th>
+                                <th>Jenis</th>
+                                <th>Detail</th>
+                                <th>Total</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="history-table-body" class="divide-y divide-slate-100">
-                            <!-- JS Inject -->
+                        <tbody id="tabelRiwayat">
+                            <!-- Data riwayat akan di-render oleh JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
-
-        <!-- ==================== TAB 4: PENGINGAT & NOTIFIKASI ==================== -->
-        <section id="tab-pengingat" class="tab-content hidden space-y-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold text-slate-800">Pengaturan Pengingat & Alert Toko</h2>
-                <p class="text-xs text-slate-500">Atur notifikasi alarm suara, target penjualan, dan batas stok minimal.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Set Alarm Waktu Operasional -->
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i> Pengingat Waktu Tutup Shift / Toko
-                    </h3>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Jam Pengingat Harian</label>
-                            <input type="time" id="reminder-time" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Pesan Pengingat</label>
-                            <input type="text" id="reminder-msg" value="Waktunya melakukan rekapitulasi kasir dan cetak laporan harian toko!" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <button onclick="saveReminderSetting()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition">
-                            Simpan Pengingat Jam
-                        </button>
-                    </div>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN PENGINGAT                        -->
+        <!-- ======================================== -->
+        <section class="page" id="page-pengingat">
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔔 Pengingat & Notifikasi</h3>
+                    <button class="btn btn-primary" id="btnTambahPengingat">+ Tambah Pengingat</button>
                 </div>
-
-                <!-- Alert & Notifikasi Suara -->
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                        <i data-lucide="bell" class="w-4 h-4 text-indigo-600"></i> Suara & Izin Notifikasi Browser
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <span class="text-xs font-medium text-slate-700">Notifikasi Pop-up Browser</span>
-                            <button onclick="requestNotificationPermission()" class="text-xs bg-indigo-100 text-indigo-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-200">
-                                Aktifkan Izin
-                            </button>
-                        </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                            <span class="text-xs font-medium text-slate-700">Uji Coba Alarm Suara</span>
-                            <button onclick="playAlertSound()" class="text-xs bg-slate-800 text-white font-semibold px-3 py-1.5 rounded-lg hover:bg-slate-900 flex items-center gap-1">
-                                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Bunyikan Bel
-                            </button>
-                        </div>
-                    </div>
+                <p class="info-text">
+                    Pengingat akan muncul sesuai waktu yang Anda atur. Pastikan izin notifikasi browser sudah diaktifkan.
+                    <button class="btn-link" id="btnIzinNotif">Aktifkan Notifikasi</button>
+                </p>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Pesan</th>
+                                <th>Waktu</th>
+                                <th>Pengulangan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelPengingat">
+                            <!-- Data pengingat akan di-render oleh JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
+        
+        <!-- ======================================== -->
+        <!-- HALAMAN PENGATURAN                       -->
+        <!-- ======================================== -->
+        <section class="page" id="page-pengaturan">
+            <div class="card">
+                <h3>⚙️ Pengaturan Aplikasi</h3>
+                <div class="form-group">
+                    <label>Nama Toko:</label>
+                    <input type="text" id="settingNamaToko" placeholder="Toko Sejahtera">
+                </div>
+                <div class="form-group">
+                    <label>Alamat Toko:</label>
+                    <textarea id="settingAlamatToko" placeholder="Jl. Contoh No. 123"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Format Mata Uang:</label>
+                    <input type="text" id="settingMataUang" value="Rp" readonly>
+                </div>
+                <button class="btn btn-primary" id="btnSimpanPengaturan">💾 Simpan Pengaturan</button>
+            </div>
+            
+            <div class="card">
+                <h3>💾 Manajemen Data</h3>
+                <p class="info-text">Backup dan restore data aplikasi Anda.</p>
+                <div class="button-group">
+                    <button class="btn btn-success" id="btnBackup">📥 Backup Semua Data</button>
+                    <button class="btn btn-warning" id="btnRestore">📤 Restore Data</button>
+                    <input type="file" id="inputRestore" accept=".json" style="display:none">
+                    <button class="btn btn-danger" id="btnResetSemua">🗑️ Reset Semua Data</button>
+                </div>
+            </div>
+        </section>
+        
     </main>
-
-    <!-- AREA STRUK / LAPORAN CETAK HANYA TERLIHAT SAAT PRINT -->
-    <div id="print-area" class="hidden"></div>
-
-    <!-- MODAL PROSES RE-STOCK BAHAN/BARANG -->
-    <div id="restock-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <i data-lucide="package-plus" class="w-5 h-5 text-indigo-600"></i> Form Restock Barang
-            </h3>
-            <input type="hidden" id="restock-product-id">
-            <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Nama Item</label>
-                <input type="text" id="restock-product-name" disabled class="w-full bg-slate-100 border border-slate-200 rounded-lg p-2 text-sm font-semibold text-slate-700">
+    
+    <!-- ============================================ -->
+    <!-- MODAL (POP-UP) UNTUK FORM                    -->
+    <!-- ============================================ -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Judul Modal</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Jumlah Tambahan Stok</label>
-                <input type="number" id="restock-qty" min="1" value="1" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Total Biaya Restock (Rp)</label>
-                <input type="number" id="restock-cost" placeholder="0" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeRestockModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-                <button onclick="submitRestock()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Simpan Restock</button>
+            <div class="modal-body" id="modalBody">
+                <!-- Konten modal akan diisi dinamis -->
             </div>
         </div>
     </div>
-
-    <!-- MODAL TAMBAH / EDIT ITEM PRODUK -->
-    <div id="product-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 id="modal-product-title" class="text-lg font-bold text-slate-800">Tambah Produk Baru</h3>
-            <input type="hidden" id="prod-id">
-            <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Nama Barang / Bahan</label>
-                <input type="text" id="prod-name" placeholder="Contoh: Kopi Arabika" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Kategori</label>
-                    <select id="prod-category" class="w-full border border-slate-200 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="Makanan">Makanan</option>
-                        <option value="Minuman">Minuman</option>
-                        <option value="Bahan">Bahan Baku</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Batas Minimal Stok</label>
-                    <input type="number" id="prod-min" value="5" min="0" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Harga Beli (Rp)</label>
-                    <input type="number" id="prod-buy" placeholder="0" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Harga J
+    
+    <!-- Toast notification -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Area tersembunyi untuk cetak -->
+    <div id="printArea" style="display:none"></div>
+    
+    <!-- Link ke JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
